@@ -25,7 +25,7 @@ export default {
 
   created() {
     this.setDefaultText()
-    console.log = () => { }
+    // console.log = () => {}
   },
 
   components: {
@@ -62,12 +62,18 @@ export default {
         upload: {
           max: 5 * 1024 * 1024,
           handler(file) {
+            console.log('file', file)
             let formData = new FormData()
-            for (let i in file) {
-              formData.append('smfile', file[i])
-            }
+            formData.append('file', file[0])
+            formData.append(
+              'key',
+              `ship-more/blog/${new Date()
+                .toISOString()
+                .slice(0, 7)
+                .replace(/-/g, '/')}/${new Date().getTime()}.${file[0].name.split('.').pop()}`
+            )
             let request = new XMLHttpRequest()
-            request.open('POST', 'https://sm.ms/api/upload')
+            request.open('POST', `https://cf-api.allinaigc.org/cf-r2-upload`)
             request.onload = that.onloadCallback
             request.send(formData)
           },
@@ -76,7 +82,7 @@ export default {
           const content = localStorage.getItem('vditorvditor') || defaultText
           this.vditor.setValue(content)
           this.vditor.focus()
-        }
+        },
       }
       this.vditor = new Vditor('vditor', options)
     },
@@ -89,6 +95,7 @@ export default {
         })
       }
       let resp = JSON.parse(currentTarget.response)
+      console.log('resp', resp)
       let imgMdStr = ''
       if (resp.code === 'invalid_source') {
         return this.$message({
